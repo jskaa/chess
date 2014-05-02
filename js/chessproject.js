@@ -13,6 +13,9 @@ function Chessboard(cols, rows) {
 	this.blackPieces = new Array(16);
 	this.whitePieces = new Array(16);
 	
+	this.pieceSelected = null;	
+	this.turn = WHITE;
+		
 	var color = BLACK_SQUARE_COLOR;
 	
 	// Initialize the board:
@@ -65,8 +68,43 @@ function Chessboard(cols, rows) {
 	this.whitePieces[14] = new ChessPiece(WHITE, PIECES.PAWN, this.board[1][6]);
 	this.whitePieces[15] = new ChessPiece(WHITE, PIECES.PAWN, this.board[1][7]);
 	
+	this.selectPiece = function(cellId) {
+		var row = cellId.substring(0, 1);
+		var col = cellId.substring(1);
+		
+		var square = this.board[row-1][col-1];
+		if(square.piece != null && square.piece.color == this.turn) {
+			console.log("Selecting " + square.piece.color + " " + square.piece.type);
+			
+			square.selected = true;
+			this.pieceSelected = square.piece;
+		}
+		
+		// Update view
+		this.updateView();
+	}
 	
-	
+	this.movePiece = function(cellId) {
+		console.log("Moving " + this.pieceSelected.color + " " + this.pieceSelected.type + " to: " + cellId);
+		
+		var row = cellId.substring(0, 1);
+		var col = cellId.substring(1);
+		
+		var square = this.board[row-1][col-1];
+		
+		// Move the piece:
+		this.pieceSelected.square.selected = false;
+		this.pieceSelected.square.piece = null;
+		this.pieceSelected.square = square;
+		square.piece = this.pieceSelected;
+		
+		this.pieceSelected = null;
+		this.turn = this.turn == WHITE ? BLACK : WHITE;
+				
+		// Update view:
+		this.updateView();
+	}
+		
 	// HTML of the board:
 	this.toHTML = function() {
 		var table = document.createElement("table");
@@ -76,15 +114,28 @@ function Chessboard(cols, rows) {
 		for(var i = this.board.length; i >= 1; i--) {
 			var row = document.createElement("tr");
 			for(var j = 1; j <= this.board[i-1].length ; j++) {
-				var cell = document.createElement("td");
-				cell.style.backgroundColor = this.board[i-1][j-1].color;
-				cell.style.width = cell.style.height = "50px";
+				var square = this.board[i-1][j-1];
 				
-				if (this.board[i-1][j-1].piece != null){
-					var test = document.createElement("img");
-					test.src = this.board[i-1][j-1].piece.background;
-					cell.appendChild(test);
-					cell.style.textAlign = "center";
+				var cell = document.createElement("td");
+				cell.id = i + "" + j;
+				cell.style.backgroundColor = square.selected ? "#39a7d4" : square.color;
+				cell.style.width = cell.style.height = "50px";
+				cell.style.cursor = "pointer";
+				cell.style.textAlign = "center";
+				
+				cell.piece = this.board[i-1][j-1].piece;
+								
+				// Set the listener:
+				if(this.pieceSelected == null) {
+					cell.onclick = function(chessboard, id) { return function() { chessboard.selectPiece(id); } }(this, cell.id);
+				} else {
+					cell.onclick = function(chessboard, id) { return function() { chessboard.movePiece(id); } }(this, cell.id);
+				}
+				
+				if (square.piece != null){
+					var pieceImage = document.createElement("img");
+					pieceImage.src = square.piece.background;
+					cell.appendChild(pieceImage);
 				}
 				
 				row.appendChild(cell);
@@ -94,6 +145,21 @@ function Chessboard(cols, rows) {
 		}
 		
 		return table;
+	}
+	
+	this.updateView = function() {		
+		console.log("Refreshing view.");
+		
+		// Show the board
+		var chessboard = document.getElementById("chessboard");
+		
+		// Clear the previous board
+		while(chessboard.firstChild) {
+			chessboard.removeChild(chessboard.firstChild);
+		}
+		
+		// Show the current board:
+		chessboard.appendChild(this.toHTML());
 	}
 }
 
@@ -106,6 +172,7 @@ function ChessSquare(color, row, column) {
 	this.color = color;
 	this.row = row;
 	this.column = column;
+	this.selected = false;
 	
 	// Initialize with a null piece:
 	this.piece = null;
@@ -120,9 +187,8 @@ function ChessPiece(color, type, square) {
 	this.square.piece = this;
 }
 
-function initChessmaster() {
+function initChessmaster() {	
+	// Create the board
 	var board = new Chessboard(8, 8);
-	
-	// Append board to the chessboard id:
-	document.getElementById("chessboard").appendChild(board.toHTML());
+	board.updateView();
 }
