@@ -93,13 +93,21 @@ function Chessboard(cols, rows) {
 		var square = this.board[row-1][col-1];
 		
 		// Move the piece:
-		this.pieceSelected.square.selected = false;
-		this.pieceSelected.square.piece = null;
-		this.pieceSelected.square = square;
-		square.piece = this.pieceSelected;
-		
-		this.pieceSelected = null;
-		this.turn = this.turn == WHITE ? BLACK : WHITE;
+		if(this.pieceSelected.isValidMove(square, this.board)) {
+			this.pieceSelected.square.selected = false;
+			this.pieceSelected.square.piece = null;
+			this.pieceSelected.square = square;
+			square.piece = this.pieceSelected;
+			
+			this.pieceSelected = null;
+			this.turn = this.turn == WHITE ? BLACK : WHITE;
+		} else {
+			alert("This is not a valid move");
+			
+			// Reset selection
+			this.pieceSelected.square.selected = false;
+			this.pieceSelected = null;			
+		}
 				
 		// Update view:
 		this.updateView();
@@ -184,6 +192,171 @@ function ChessPiece(color, type, square) {
 	this.background = "resources/images/" + color + "_" + type + ".png";
 	
 	this.square.piece = this;
+	
+	// Move function
+	// The Move function checks if a move is valid by applying
+	// the movement rules for the types of pieces. 
+	// Some code is reused in multiple places and could be moved
+	// to a separate function to prevent code repitition.
+	// This can be a future goal as the main purpose now is to implement 
+	// movement restrictions.
+	this.isValidMove = function(moveTo, board) {	
+		var y = Math.abs(moveTo.row - this.square.row);
+		var x = Math.abs(moveTo.column - this.square.column);
+		var toX = moveTo.column;
+		var toY = moveTo.row;
+		var fromX = this.square.column;
+		var fromY = this.square.row;		
+		
+		if(this.type == PIECES.PAWN) {	
+			// If the landing square has a piece in it, this has to be a striking move
+			if(moveTo.piece != null && moveTo.piece.color != this.color && y == 1 && x == 1) return true;
+			
+			// If the landing square is empty and this was a forward move, it's allowed:
+			if(moveTo.piece == null && y == 1 && x == 0) return true;
+			
+			// Any other move is false:
+			return false;
+		} else if(this.type == PIECES.BISHOP) {
+			if (x == y) {
+				var startX;
+				var startY;
+				var yModifier;
+				var endX;
+
+				// Set up the variables for the correct diagonal
+				if (toX < fromX) {
+					startX = toX + 1;
+					endX = fromX;
+
+					startY = toY > fromY ? toY - 1 : toY + 1;
+					yModifier = toY > fromY ? -1 : 1;
+				} else {
+					startX = fromX + 1;
+					endX = toX;
+					startY = toY > fromY ? fromY + 1 : fromY - 1;
+					yModifier = toY > fromY ? 1 : -1;
+				}
+
+				// Check the diagonal for obstructions
+				for (var i = startX; i < endX; i++) {
+					if(board[startY][i].piece != null) {
+						return false;
+					}
+
+					startY += yModifier;
+				}
+
+				if (moveTo.piece == null || (moveTo.piece != null && moveTo.piece.color != this.color)) {
+					return true;
+				}
+			}
+
+			return false;		
+		} else if(this.type == PIECES.KNIGHT) {
+			if((x == 2 && y == 1) || (x == 1 && y == 2)) {
+				return moveTo.piece == null || (moveTo.piece != null && moveTo.piece.color != this.color)
+			}
+			
+			return false;
+		} else if(this.type == PIECES.ROOK) {
+			// Only straight moves allowed:
+			if ((x != 0 && y == 0) || (y != 0 && x == 0)) {
+				if (x == 0) {
+					var startY = (fromY < toY ? fromY : toY) + 1;
+					var endY = fromY < toY ? toY : fromY;
+
+					for (var i = startY; i < endY; i++) {
+						if (board[i][fromX].piece != null) {
+							return false;
+						}
+					}
+				} else {
+					var startX = (fromX < toX ? fromX : toX) + 1;
+					var endX = fromX < toX ? toX : fromX;
+
+					for (var i = startX; i < endX; i++) {
+						if (board[fromY][i].piece != null) {
+							return false;
+						}
+					}
+				}
+				
+				if (moveTo.piece == null || (moveTo.piece != null && moveTo.piece.color != this.color)) {
+					return true;
+				}
+			}
+			
+			return false;
+		} else if(this.type == PIECES.QUEEN) {
+			// Straight & Diagonal moves allowed:
+			if ((x != 0 && y == 0) || (y != 0 && x == 0) || x == y) {
+				if (x == 0) {
+					// Check the vertical line:
+					var startY = (fromY < toY ? fromY : toY) + 1;
+					var endY = fromY < toY ? toY : fromY;
+
+					for (var i = startY; i < endY; i++) {
+						if (board[i][fromX].piece != null) {
+							return false;
+						}
+					}
+				} else if(y == 0) {
+					// Check the horizontal line
+					var startX = (fromX < toX ? fromX : toX) + 1;
+					var endX = fromX < toX ? toX : fromX;
+
+					for (var i = startX; i < endX; i++) {
+						if (board[fromY][i].piece != null) {
+							return false;
+						}
+					}
+				} else {
+					// Check the diagonal
+					var startX;	
+					var startY;
+					var yModifier;
+					var endX;
+
+					// Set up the variables for the correct diagonal
+					if (toX < fromX) {
+						startX = toX + 1;
+						endX = fromX;
+
+						startY = toY > fromY ? toY - 1 : toY + 1;
+						yModifier = toY > fromY ? -1 : 1;
+					} else {
+						startX = fromX + 1;
+						endX = toX;
+						startY = toY > fromY ? fromY + 1 : fromY - 1;
+						yModifier = toY > fromY ? 1 : -1;
+					}
+
+					// Check the diagonal for obstructions
+					for (var i = startX; i < endX; i++) {
+						if(board[startY][i].piece != null) {
+							return false;
+						}
+
+						startY += yModifier;
+					}					
+				}
+				
+				if (moveTo.piece == null || (moveTo.piece != null && moveTo.piece.color != this.color)) {
+					return true;
+				}
+			}
+			
+			return false;			
+		} else if(this.type == PIECES.KING) {
+			// Any 1 step move in any direction
+			if(Math.abs(y) > 1 && x > 1) return false;
+			
+			if(moveTo.piece == null || (moveTo.piece != null && moveTo.piece.color != this.color)) return true;			
+		}
+		
+		return false;
+	}
 }
 
 function initChessmaster() {	
