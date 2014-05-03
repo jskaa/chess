@@ -5,8 +5,8 @@ body {
 }
 
 #chessboard {
-	width: 400px;
-	height: 400px;
+	width: 425px;
+	height: 430px;
 	float: left;
 	margin-right: 25px;
 }
@@ -27,6 +27,6 @@ body {
 }
 
 .wrapper {
-	width: 750px;
+	width: 775px;
 	margin: 0 auto;
 }

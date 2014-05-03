@@ -85,16 +85,16 @@ function Chessboard(cols, rows) {
 	this.movePiece = function(cellId) {	
 		var row = cellId.substring(0, 1);
 		var col = cellId.substring(1);
-		
-		// Add log entry for this move:
-		var logentry = document.createElement("div");
-		logentry.innerHTML = "Moving " + this.pieceSelected.color + " " + this.pieceSelected.type + " to: " + COLUMN_INDEX[col-1] + row;
-		document.getElementById('log').appendChild(logentry);
-		
+				
 		var square = this.board[row-1][col-1];
 		
 		// Move the piece:
 		if(this.pieceSelected.isValidMove(square, this.board)) {
+			// Add log entry for this move:
+			var logentry = document.createElement("div");
+			logentry.innerHTML = "Moving " + this.pieceSelected.color + " " + this.pieceSelected.type + " to: " + COLUMN_INDEX[col-1] + row;
+			document.getElementById('log').appendChild(logentry);
+		
 			this.pieceSelected.square.selected = false;
 			this.pieceSelected.square.piece = null;
 			this.pieceSelected.square = square;
@@ -122,6 +122,13 @@ function Chessboard(cols, rows) {
 		
 		for(var i = this.board.length; i >= 1; i--) {
 			var row = document.createElement("tr");
+			
+			// Create label element in front marking the rows:
+			var rowLabel = document.createElement("td");
+			rowLabel.innerHTML = i;
+			rowLabel.style.width = "25px";
+			row.appendChild(rowLabel);
+			
 			for(var j = 1; j <= this.board[i-1].length ; j++) {
 				var square = this.board[i-1][j-1];
 				
@@ -148,9 +155,24 @@ function Chessboard(cols, rows) {
 				
 				row.appendChild(cell);
 			}		
-			
 			table.appendChild(row);
 		}
+		
+		// Create last row containing the letter labels:
+		var labelRow = document.createElement("tr");
+		
+		// One empty <td> for the corner
+		labelRow.appendChild(document.createElement("td"));
+		for(var i = 0; i < COLUMN_INDEX.length; i++) {
+			// Create label element in front marking the rows:
+			var colLabel = document.createElement("td");
+			colLabel.innerHTML = COLUMN_INDEX[i];
+			colLabel.style.height = "30px";
+			colLabel.style.textAlign = "center";
+			labelRow.appendChild(colLabel);			
+		}
+		
+		table.appendChild(labelRow);
 		
 		return table;
 	}
