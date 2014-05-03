@@ -1,5 +1,5 @@
 var PIECES = { BISHOP : "bishop", KNIGHT : "knight", ROOK : "rook", KING : "king", QUEEN : "queen", PAWN : "pawn" };
-var COLUMN_INDEX = "abcdefgh";
+var COLUMN_INDEX = "ABCDEFGH";
 var BLACK = "black";
 var WHITE = "white";
 var BLACK_SQUARE_COLOR = "#80681F";
@@ -73,9 +73,7 @@ function Chessboard(cols, rows) {
 		var col = cellId.substring(1);
 		
 		var square = this.board[row-1][col-1];
-		if(square.piece.color == this.turn) {
-			console.log("Selecting " + square.piece.color + " " + square.piece.type);
-			
+		if(square.piece.color == this.turn) {			
 			square.selected = true;
 			this.pieceSelected = square.piece;
 		}
@@ -84,11 +82,14 @@ function Chessboard(cols, rows) {
 		this.updateView();
 	}
 	
-	this.movePiece = function(cellId) {
-		console.log("Moving " + this.pieceSelected.color + " " + this.pieceSelected.type + " to: " + cellId);
-		
+	this.movePiece = function(cellId) {	
 		var row = cellId.substring(0, 1);
 		var col = cellId.substring(1);
+		
+		// Add log entry for this move:
+		var logentry = document.createElement("div");
+		logentry.innerHTML = "Moving " + this.pieceSelected.color + " " + this.pieceSelected.type + " to: " + COLUMN_INDEX[col-1] + row;
+		document.getElementById('log').appendChild(logentry);
 		
 		var square = this.board[row-1][col-1];
 		
@@ -154,8 +155,9 @@ function Chessboard(cols, rows) {
 		return table;
 	}
 	
-	this.updateView = function() {		
-		console.log("Refreshing view.");
+	this.updateView = function() {				
+		// Show the turn:
+		document.getElementById("turn").innerHTML = "Turn: " + this.turn;
 		
 		// Show the board
 		var chessboard = document.getElementById("chessboard");
@@ -360,7 +362,13 @@ function ChessPiece(color, type, square) {
 }
 
 function initChessmaster() {	
+	// Initialize the log
+	var logheader = document.createElement("h2");
+	logheader.innerHTML = "Log";
+	document.getElementById('log').appendChild(logheader);
+	
 	// Create the board
 	var board = new Chessboard(8, 8);
 	board.updateView();
+	
 }

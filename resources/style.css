@@ -1,0 +1,31 @@
+body {
+	font-family: "Arial", sans-serif;
+	margin: 0;
+	padding: 0;
+}
+
+#chessboard {
+	width: 400px;
+	height: 400px;
+	float: left;
+	margin-right: 25px;
+}
+
+#log {
+	background-color: #d1d1d1;
+	padding: 0px 15px 15px 15px;
+	width: 295px;
+	height: 385px;
+	float: right;
+	overflow: auto;
+}
+
+#turn {
+	margin-bottom: 15px;
+	font-size: 12pt;
+}
+
+.wrapper {
+	width: 750px;
+	margin: 0 auto;
+}
