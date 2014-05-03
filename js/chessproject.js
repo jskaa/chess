@@ -364,8 +364,13 @@ function ChessPiece(color, type, square) {
 function initChessmaster() {	
 	// Initialize the log
 	var logheader = document.createElement("h2");
-	logheader.innerHTML = "Log";
+	logheader.innerHTML = "Message log";
 	document.getElementById('log').appendChild(logheader);
+	
+	var logstart = document.createElement("div");
+	logstart.innerHTML = "Welcome to my Javascript Chess project! You can start playing right away. Refresh the page to start a new game.";
+	logstart.style.marginBottom = "10px";
+	document.getElementById('log').appendChild(logstart);
 	
 	// Create the board
 	var board = new Chessboard(8, 8);
