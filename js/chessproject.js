@@ -73,7 +73,7 @@ function Chessboard(cols, rows) {
 		var col = cellId.substring(1);
 		
 		var square = this.board[row-1][col-1];
-		if(square.piece != null && square.piece.color == this.turn) {
+		if(square.piece.color == this.turn) {
 			console.log("Selecting " + square.piece.color + " " + square.piece.type);
 			
 			square.selected = true;
@@ -123,12 +123,11 @@ function Chessboard(cols, rows) {
 				cell.style.cursor = "pointer";
 				cell.style.textAlign = "center";
 				
-				cell.piece = this.board[i-1][j-1].piece;
-								
+											
 				// Set the listener:
-				if(this.pieceSelected == null) {
+				if(this.pieceSelected == null && square.piece != null) {
 					cell.onclick = function(chessboard, id) { return function() { chessboard.selectPiece(id); } }(this, cell.id);
-				} else {
+				} else if(this.pieceSelected != null){
 					cell.onclick = function(chessboard, id) { return function() { chessboard.movePiece(id); } }(this, cell.id);
 				}
 				
